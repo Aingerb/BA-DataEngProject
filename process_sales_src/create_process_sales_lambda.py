@@ -17,9 +17,9 @@ def create_lambda():
                 "Action": "sts:AssumeRole"}]}'
     except ClientError as e:
         if e.response['Error']['Code'] == 'EntityAlreadyExists':
-            print("User already exists")
+            raise ValueError("User already exists")
         else:
-            print("Unexpected error in role creation")
+            raise Exception("Unexpected error in role creation")
 
     # Create the role
     try:
@@ -29,16 +29,17 @@ def create_lambda():
         )
     except ClientError as e:
         if e.response['Error']['Code'] == 'EntityAlreadyExists':
-            print("User already exists")
+            raise ValueError("User already exists")
         else:
-            print("Unexpected error in role creation")
+            raise Exception("Unexpected error in role creation")
 
     try:
         iam_create_role_response_ARN = response['Role']['Arn'] 
     except NameError as ne:
-        print('Name Error, role most likely exists already')
-        get_role_response=iam.get_role(RoleName=role_name)
-        iam_create_role_response_ARN = get_role_response['Role']['Arn']
+        raise ValueError('Name Error, role most likely exists already')
+        
+    get_role_response=iam.get_role(RoleName=role_name)
+    iam_create_role_response_ARN = get_role_response['Role']['Arn']
         
 
     time.sleep(1)
@@ -111,7 +112,7 @@ def create_lambda():
         )['Policy']['Arn']
     except ClientError as e:
         if e.response['Error']['Code'] == 'EntityAlreadyExists':
-            print("User already exists")
+            raise ValueError("User already exists")
             
 
     ## above succesfully creates the policy for us-east-1 to create log group for specific function
@@ -124,7 +125,7 @@ def create_lambda():
             PolicyArn=cloudwatchPolicyArn
         )
     except Exception as e:
-        print(e)
+        raise Exception("error attaching policy to role")
     
 
 
